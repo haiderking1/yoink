@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=DY
+GenericName=Download Manager
+Comment=A small download manager powered by aria2
+Exec=@BINDIR@/dy
+Icon=folder-download
+Terminal=false
+Categories=Network;FileTransfer;
+Keywords=download;aria2;torrent;magnet;
+StartupNotify=true

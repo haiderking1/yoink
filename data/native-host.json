@@ -1,0 +1,7 @@
+{
+  "name": "dev.soka.dy",
+  "description": "Bridge between the DY browser extension and the DY download manager",
+  "path": "@BINDIR@/dy-host",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://lhgifgliafhapcnkidogoabkcobhehgi/"]
+}

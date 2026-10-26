@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "DY Download Catcher",
+  "version": "0.2.0",
+  "description": "Sends your downloads to DY (aria2) instead of the browser's downloader.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvrHCVio5rpNdrR/RXSgRGdhBfdSKrGTwubG6Rg8ZCcemW8YiRLS+CdvBq0djs5u1e+3tJiLpFNDJEdEQdXWw3v/XlrRBnhZxQgyprlLgj5wj1ujyQVi0iA+Ey0c/nVw6YBN9kui1oi/+ee2NTzaJnW5g1fgD4beUo/mnKlBUApaLqVD+q3VbHDO/k19PlGxPxPXTpXlg53w8zMTaWHHEHRbhAWoRYDBZ9KMEmxoSnKPLlapoUftpebUJHJGq+7vGJEixG7OhZDxWjPPstjUbUvoIfR4WCsk1duDidVpA7h49kPIc4N18JjvfWxxIOijyZhO8ieqdd+D9kRkMfcbHHQIDAQAB",
+  "minimum_chrome_version": "120",
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "permissions": ["downloads", "nativeMessaging", "cookies", "contextMenus", "storage", "webRequest"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_title": "DY",
+    "default_icon": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png" }
+  },
+  "options_ui": { "page": "options/options.html", "open_in_tab": false },
+  "icons": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+}

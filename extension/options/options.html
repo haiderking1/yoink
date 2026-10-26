@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DY Options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <section class="status" id="status" data-state="checking">
+      <span class="dot"></span>
+      <span id="status-text">Checking DY…</span>
+    </section>
+
+    <label class="row">
+      <span class="text">
+        <strong>Catch browser downloads</strong>
+        <small>Send downloads to DY instead of Chromium's downloader</small>
+      </span>
+      <input type="checkbox" id="enabled" class="switch">
+    </label>
+
+    <label class="row">
+      <span class="text">
+        <strong>Minimum size</strong>
+        <small>Smaller files stay in the browser</small>
+      </span>
+      <span class="number"><input type="number" id="minSizeMB" min="0" step="0.5"> MB</span>
+    </label>
+
+    <label class="row">
+      <span class="text">
+        <strong>Catch unknown sizes</strong>
+        <small>When the server doesn't say how big the file is</small>
+      </span>
+      <input type="checkbox" id="takeUnknownSize" class="switch">
+    </label>
+
+    <label class="column">
+      <span class="text">
+        <strong>Never catch from these sites</strong>
+        <small>One per line, like drive.google.com. Subdomains count too.</small>
+      </span>
+      <textarea id="excludedSites" rows="4" spellcheck="false"></textarea>
+    </label>
+  </main>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

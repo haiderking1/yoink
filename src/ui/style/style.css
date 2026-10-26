@@ -1,0 +1,60 @@
+/* Download rows */
+.dl-row {
+  padding: 14px 10px 14px 16px;
+}
+
+.dl-icon {
+  min-width: 42px;
+  min-height: 42px;
+  border-radius: 12px;
+  color: var(--accent-color);
+  background-color: color-mix(in srgb, var(--accent-bg-color) 16%, transparent);
+}
+
+.dl-icon.complete {
+  color: var(--success-color);
+  background-color: color-mix(in srgb, var(--success-bg-color) 16%, transparent);
+}
+
+.dl-icon.error {
+  color: var(--error-color);
+  background-color: color-mix(in srgb, var(--error-bg-color) 16%, transparent);
+}
+
+.dl-icon.paused,
+.dl-icon.waiting {
+  color: color-mix(in srgb, var(--window-fg-color) 60%, transparent);
+  background-color: color-mix(in srgb, var(--window-fg-color) 8%, transparent);
+}
+
+.dl-name {
+  font-weight: 600;
+}
+
+progressbar.dl-progress > trough,
+progressbar.dl-progress > trough > progress {
+  min-height: 6px;
+  border-radius: 999px;
+}
+
+progressbar.dl-progress.complete > trough > progress {
+  background-color: var(--success-bg-color);
+}
+
+progressbar.dl-progress.error > trough > progress {
+  background-color: var(--error-bg-color);
+}
+
+progressbar.dl-progress.paused > trough > progress,
+progressbar.dl-progress.waiting > trough > progress {
+  background-color: color-mix(in srgb, var(--window-fg-color) 35%, transparent);
+}
+
+/* Footer with global speeds */
+.dy-footer {
+  padding: 6px 12px;
+}
+
+.dy-footer image {
+  opacity: 0.55;
+}
