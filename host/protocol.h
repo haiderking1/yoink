@@ -7,5 +7,5 @@
  * many bytes of UTF-8 JSON. */
 
 /* NULL without error at a clean EOF (the browser closed the pipe). */
-JsonNode *dy_host_read_message  (GInputStream *in, GError **error);
-gboolean  dy_host_write_message (GOutputStream *out, JsonNode *message, GError **error);
+JsonNode *yoink_host_read_message  (GInputStream *in, GError **error);
+gboolean  yoink_host_write_message (GOutputStream *out, JsonNode *message, GError **error);

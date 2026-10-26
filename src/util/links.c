@@ -3,7 +3,7 @@
 #include <string.h>
 
 gboolean
-dy_is_link (const char *s)
+yoink_is_link (const char *s)
 {
   static const char *prefixes[] = { "http://", "https://", "ftp://", "sftp://", "magnet:" };
 
@@ -16,7 +16,7 @@ dy_is_link (const char *s)
 }
 
 char *
-dy_uri_basename (const char *uri)
+yoink_uri_basename (const char *uri)
 {
   g_autoptr (GUri) u = g_uri_parse (uri, G_URI_FLAGS_NONE, NULL);
   const char *path = u ? g_uri_get_path (u) : NULL;

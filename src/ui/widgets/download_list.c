@@ -4,44 +4,44 @@
 #include "ui/support/launch.h"
 #include "ui/widgets/row.h"
 
-struct _DyDownloadList {
+struct _YoinkDownloadList {
   AdwBin      parent_instance;
   GtkListBox *list;
-  GHashTable *rows;  /* gid -> DyRow (owned by the list box) */
+  GHashTable *rows;  /* gid -> YoinkRow (owned by the list box) */
 };
 
-G_DEFINE_FINAL_TYPE (DyDownloadList, dy_download_list, ADW_TYPE_BIN)
+G_DEFINE_FINAL_TYPE (YoinkDownloadList, yoink_download_list, ADW_TYPE_BIN)
 
 static void
-dy_download_list_finalize (GObject *object)
+yoink_download_list_finalize (GObject *object)
 {
-  g_hash_table_unref (DY_DOWNLOAD_LIST (object)->rows);
-  G_OBJECT_CLASS (dy_download_list_parent_class)->finalize (object);
+  g_hash_table_unref (YOINK_DOWNLOAD_LIST (object)->rows);
+  G_OBJECT_CLASS (yoink_download_list_parent_class)->finalize (object);
 }
 
 static void
-dy_download_list_class_init (DyDownloadListClass *klass)
+yoink_download_list_class_init (YoinkDownloadListClass *klass)
 {
-  G_OBJECT_CLASS (klass)->finalize = dy_download_list_finalize;
+  G_OBJECT_CLASS (klass)->finalize = yoink_download_list_finalize;
 }
 
 static int
 sort_rows (GtkListBoxRow *a, GtkListBoxRow *b, gpointer user_data)
 {
-  int ka = dy_row_get_sort_key (DY_ROW (a));
-  int kb = dy_row_get_sort_key (DY_ROW (b));
+  int ka = yoink_row_get_sort_key (YOINK_ROW (a));
+  int kb = yoink_row_get_sort_key (YOINK_ROW (b));
   return (ka > kb) - (ka < kb);
 }
 
 static void
 on_row_activated (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
 {
-  if (dy_row_get_state (DY_ROW (row)) == DY_STATE_COMPLETE)
-    dy_launch_open (GTK_WIDGET (row), dy_row_get_path (DY_ROW (row)));
+  if (yoink_row_get_state (YOINK_ROW (row)) == YOINK_STATE_COMPLETE)
+    yoink_launch_open (GTK_WIDGET (row), yoink_row_get_path (YOINK_ROW (row)));
 }
 
 static void
-dy_download_list_init (DyDownloadList *self)
+yoink_download_list_init (YoinkDownloadList *self)
 {
   self->rows = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
@@ -66,36 +66,36 @@ dy_download_list_init (DyDownloadList *self)
   adw_bin_set_child (ADW_BIN (self), scroll);
 }
 
-DyDownloadList *
-dy_download_list_new (void)
+YoinkDownloadList *
+yoink_download_list_new (void)
 {
-  return g_object_new (DY_TYPE_DOWNLOAD_LIST, NULL);
+  return g_object_new (YOINK_TYPE_DOWNLOAD_LIST, NULL);
 }
 
 void
-dy_download_list_update (DyDownloadList *self, GPtrArray *items)
+yoink_download_list_update (YoinkDownloadList *self, GPtrArray *items)
 {
   g_autoptr (GHashTable) seen = g_hash_table_new (g_str_hash, g_str_equal);
   gboolean resort = FALSE;
 
   for (guint i = 0; i < items->len; i++) {
-    const DyItem *item = g_ptr_array_index (items, i);
-    DyRow *row = g_hash_table_lookup (self->rows, item->gid);
+    const YoinkItem *item = g_ptr_array_index (items, i);
+    YoinkRow *row = g_hash_table_lookup (self->rows, item->gid);
 
     if (!row) {
-      row = dy_row_new (item->gid);
+      row = yoink_row_new (item->gid);
       g_hash_table_insert (self->rows, g_strdup (item->gid), row);
       gtk_list_box_append (self->list, GTK_WIDGET (row));
       resort = TRUE;
     }
-    resort |= dy_row_set_sort_key (row, (int) i);
-    dy_row_update (row, item);
+    resort |= yoink_row_set_sort_key (row, (int) i);
+    yoink_row_update (row, item);
     g_hash_table_add (seen, item->gid);
   }
 
   GHashTableIter iter;
   const char *gid;
-  DyRow *row;
+  YoinkRow *row;
   g_hash_table_iter_init (&iter, self->rows);
   while (g_hash_table_iter_next (&iter, (gpointer *) &gid, (gpointer *) &row)) {
     if (g_hash_table_contains (seen, gid))
@@ -109,14 +109,14 @@ dy_download_list_update (DyDownloadList *self, GPtrArray *items)
 }
 
 void
-dy_download_list_clear (DyDownloadList *self)
+yoink_download_list_clear (YoinkDownloadList *self)
 {
   g_hash_table_remove_all (self->rows);
   gtk_list_box_remove_all (self->list);
 }
 
 guint
-dy_download_list_get_count (DyDownloadList *self)
+yoink_download_list_get_count (YoinkDownloadList *self)
 {
   return g_hash_table_size (self->rows);
 }

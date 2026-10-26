@@ -3,10 +3,10 @@
 #include "util/json.h"
 
 typedef struct {
-  Aria2Client  *client;
-  char         *gid;
-  DyControlDone done;
-  gpointer      user_data;
+  Aria2Client     *client;
+  char            *gid;
+  YoinkControlDone done;
+  gpointer         user_data;
 } Retry;
 
 /* Options worth carrying over to the new download. */
@@ -38,11 +38,11 @@ collect_uris (JsonObject *status)
 {
   JsonArray *uris = json_array_new ();
   g_autoptr (GHashTable) seen = g_hash_table_new (g_str_hash, g_str_equal);
-  JsonArray *list = dy_json_arr (dy_json_arr_obj (dy_json_arr (status, "files"), 0), "uris");
+  JsonArray *list = yoink_json_arr (yoink_json_arr_obj (yoink_json_arr (status, "files"), 0), "uris");
   guint n = list ? json_array_get_length (list) : 0;
 
   for (guint i = 0; i < n; i++) {
-    const char *uri = dy_json_str (dy_json_arr_obj (list, i), "uri");
+    const char *uri = yoink_json_str (yoink_json_arr_obj (list, i), "uri");
     if (uri && g_hash_table_add (seen, (gpointer) uri))
       json_array_add_string_element (uris, uri);
   }
@@ -55,15 +55,15 @@ collect_options (JsonObject *status, JsonObject *current)
   JsonObject *opts = json_object_new ();
 
   for (guint i = 0; i < G_N_ELEMENTS (carried_options); i++) {
-    const char *v = dy_json_str (current, carried_options[i]);
+    const char *v = yoink_json_str (current, carried_options[i]);
     if (v)
       json_object_set_string_member (opts, carried_options[i], v);
   }
-  if (!json_object_has_member (opts, "dir") && dy_json_str (status, "dir"))
-    json_object_set_string_member (opts, "dir", dy_json_str (status, "dir"));
+  if (!json_object_has_member (opts, "dir") && yoink_json_str (status, "dir"))
+    json_object_set_string_member (opts, "dir", yoink_json_str (status, "dir"));
 
   /* getOption joins repeated headers with newlines; addUri wants an array */
-  const char *headers = dy_json_str (current, "header");
+  const char *headers = yoink_json_str (current, "header");
   if (headers && *headers) {
     g_auto (GStrv) lines = g_strsplit (headers, "\n", -1);
     JsonArray *arr = json_array_new ();
@@ -109,7 +109,7 @@ on_info (JsonNode *result, const GError *error, gpointer user_data)
 }
 
 void
-dy_retry (Aria2Client *c, const char *gid, DyControlDone done, gpointer user_data)
+yoink_retry (Aria2Client *c, const char *gid, YoinkControlDone done, gpointer user_data)
 {
   Retry *r = g_new0 (Retry, 1);
   r->client = aria2_client_ref (c);

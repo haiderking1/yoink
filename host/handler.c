@@ -23,16 +23,16 @@ handle_add (JsonObject *msg)
   if (!request || !JSON_NODE_HOLDS_OBJECT (request))
     return reply (FALSE, "Missing request");
 
-  /* DY validates the request itself; we only carry it over */
+  /* Yoink validates the request itself; we only carry it over */
   g_autofree char *json = json_to_string (request, FALSE);
   g_autoptr (GError) error = NULL;
-  if (!dy_host_launch (json, &error))
+  if (!yoink_host_launch (json, &error))
     return reply (FALSE, error->message);
   return reply (TRUE, NULL);
 }
 
 JsonNode *
-dy_host_handle (JsonNode *message)
+yoink_host_handle (JsonNode *message)
 {
   JsonObject *msg = JSON_NODE_HOLDS_OBJECT (message) ? json_node_get_object (message) : NULL;
   const char *type = msg ? json_object_get_string_member_with_default (msg, "type", NULL) : NULL;

@@ -13,7 +13,7 @@ drop_files (GtkWidget *target, GSList *files)
 
     if (g_file_has_uri_scheme (file, "file") && g_str_has_suffix (uri, ".torrent"))
       gtk_widget_activate_action (target, "app.add-torrent", "s", uri);
-    else if (dy_is_link (uri))
+    else if (yoink_is_link (uri))
       g_string_append_printf (links, "%s\n", uri);
   }
 
@@ -38,7 +38,7 @@ on_drop (GtkDropTarget *drop, const GValue *value, double x, double y, gpointer 
 }
 
 void
-dy_drop_install (GtkWidget *target)
+yoink_drop_install (GtkWidget *target)
 {
   GtkDropTarget *drop = gtk_drop_target_new (G_TYPE_INVALID, GDK_ACTION_COPY);
   gtk_drop_target_set_gtypes (drop, (GType[]) { GDK_TYPE_FILE_LIST, G_TYPE_STRING }, 2);

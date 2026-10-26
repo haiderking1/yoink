@@ -15,7 +15,7 @@ on_picked (GObject *src, GAsyncResult *res, gpointer user_data)
 }
 
 void
-dy_torrent_picker_present (GtkWidget *parent)
+yoink_torrent_picker_present (GtkWidget *parent)
 {
   g_autoptr (GtkFileDialog) fd = gtk_file_dialog_new ();
   gtk_file_dialog_set_title (fd, "Open Torrent Files");

@@ -10,7 +10,7 @@ build_menu (void)
 
   g_autoptr (GMenu) misc = g_menu_new ();
   g_menu_append (misc, "_Open Downloads Folder", "app.open-folder");
-  g_menu_append (misc, "_About DY", "app.about");
+  g_menu_append (misc, "_About Yoink", "app.about");
   g_menu_append (misc, "_Quit", "app.quit");
 
   GMenu *menu = g_menu_new ();
@@ -20,7 +20,7 @@ build_menu (void)
 }
 
 GtkWidget *
-dy_header_new (AdwWindowTitle **title_out)
+yoink_header_new (AdwWindowTitle **title_out)
 {
   GtkWidget *header = adw_header_bar_new ();
 

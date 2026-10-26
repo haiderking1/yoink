@@ -1,5 +1,5 @@
-// IDM-style takeover: every download the browser starts is offered to DY
-// first. If DY can't take it, the browser carries on as if nothing happened.
+// IDM-style takeover: every download the browser starts is offered to Yoink
+// first. If Yoink can't take it, the browser carries on as if nothing happened.
 
 import { skipReason } from './filter.js';
 import { sendToDy } from './native.js';
@@ -20,7 +20,7 @@ async function takeOver(item) {
   try {
     await sendToDy(request);
   } catch (err) {
-    console.warn('DY: hand-off failed, the browser keeps this download:', err);
+    console.warn('Yoink: hand-off failed, the browser keeps this download:', err);
     showProblem(err.message);
     return false;
   }

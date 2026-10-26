@@ -8,7 +8,7 @@
 #define MAX_OUTGOING (1u * 1024 * 1024)
 
 JsonNode *
-dy_host_read_message (GInputStream *in, GError **error)
+yoink_host_read_message (GInputStream *in, GError **error)
 {
   guint32 len;
   gsize got = 0;
@@ -41,7 +41,7 @@ dy_host_read_message (GInputStream *in, GError **error)
 }
 
 gboolean
-dy_host_write_message (GOutputStream *out, JsonNode *message, GError **error)
+yoink_host_write_message (GOutputStream *out, JsonNode *message, GError **error)
 {
   gsize size;
   g_autofree char *json = json_to_string (message, FALSE);

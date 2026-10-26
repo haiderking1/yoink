@@ -69,9 +69,9 @@ parse_envelope (GBytes *body, GError **error)
     return NULL;
   }
 
-  JsonObject *err = dy_json_obj (obj, "error");
+  JsonObject *err = yoink_json_obj (obj, "error");
   if (err) {
-    const char *msg = dy_json_str (err, "message");
+    const char *msg = yoink_json_str (err, "message");
     g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED, msg ? msg : "aria2 returned an error");
     return NULL;
   }
@@ -86,7 +86,7 @@ call_thread (GTask *task, gpointer src, gpointer task_data, GCancellable *cancel
   Call *call = task_data;
   GError *error = NULL;
 
-  g_autoptr (GBytes) body = dy_http_post_json (call->port, "/jsonrpc", call->body, cancel, &error);
+  g_autoptr (GBytes) body = yoink_http_post_json (call->port, "/jsonrpc", call->body, cancel, &error);
   JsonNode *result = body ? parse_envelope (body, &error) : NULL;
 
   if (result)
@@ -129,7 +129,7 @@ aria2_call (Aria2Client *c, const char *method, JsonArray *params, Aria2Callback
 {
   g_autoptr (JsonObject) req = json_object_new ();
   json_object_set_string_member (req, "jsonrpc", "2.0");
-  json_object_set_string_member (req, "id", "dy");
+  json_object_set_string_member (req, "id", "yoink");
   json_object_set_string_member (req, "method", method);
   json_object_set_array_member (req, "params", with_token (c, method, params));
   g_autoptr (JsonNode) node = json_node_init_object (json_node_alloc (), req);

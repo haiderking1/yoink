@@ -5,17 +5,17 @@
 #include "util/json.h"
 #include "util/links.h"
 
-DyRequest *
-dy_request_new (void)
+YoinkRequest *
+yoink_request_new (void)
 {
-  DyRequest *r = g_new0 (DyRequest, 1);
+  YoinkRequest *r = g_new0 (YoinkRequest, 1);
   r->uris = g_ptr_array_new_with_free_func (g_free);
   r->headers = g_ptr_array_new_with_free_func (g_free);
   return r;
 }
 
 void
-dy_request_free (DyRequest *r)
+yoink_request_free (YoinkRequest *r)
 {
   if (!r)
     return;
@@ -41,16 +41,16 @@ invalid (GError **error, const char *what, const char *value)
 }
 
 gboolean
-dy_request_add_uri (DyRequest *r, const char *uri, GError **error)
+yoink_request_add_uri (YoinkRequest *r, const char *uri, GError **error)
 {
-  if (!dy_is_link (uri) || has_line_break (uri))
+  if (!yoink_is_link (uri) || has_line_break (uri))
     return invalid (error, "link", uri);
   g_ptr_array_add (r->uris, g_strdup (uri));
   return TRUE;
 }
 
 gboolean
-dy_request_add_header (DyRequest *r, const char *header, GError **error)
+yoink_request_add_header (YoinkRequest *r, const char *header, GError **error)
 {
   /* a line break would let a header smuggle in another one */
   const char *colon = strchr (header, ':');
@@ -61,7 +61,7 @@ dy_request_add_header (DyRequest *r, const char *header, GError **error)
 }
 
 gboolean
-dy_request_set_out (DyRequest *r, const char *name, GError **error)
+yoink_request_set_out (YoinkRequest *r, const char *name, GError **error)
 {
   /* a bare file name only: never let a request write outside the download dir */
   if (!*name || strchr (name, '/') || g_str_equal (name, ".") || g_str_equal (name, "..") ||
@@ -81,8 +81,8 @@ set_plain_string (char **field, const char *what, const char *value, GError **er
 }
 
 static gboolean
-add_string_array (JsonArray *a, gboolean (*add) (DyRequest *, const char *, GError **),
-                  DyRequest *r, const char *what, GError **error)
+add_string_array (JsonArray *a, gboolean (*add) (YoinkRequest *, const char *, GError **),
+                  YoinkRequest *r, const char *what, GError **error)
 {
   guint n = json_array_get_length (a);
   for (guint i = 0; i < n; i++) {
@@ -95,24 +95,24 @@ add_string_array (JsonArray *a, gboolean (*add) (DyRequest *, const char *, GErr
   return TRUE;
 }
 
-DyRequest *
-dy_request_from_json (JsonObject *o, GError **error)
+YoinkRequest *
+yoink_request_from_json (JsonObject *o, GError **error)
 {
-  g_autoptr (DyRequest) r = dy_request_new ();
+  g_autoptr (YoinkRequest) r = yoink_request_new ();
   const char *s;
   JsonArray *a;
 
-  if ((s = dy_json_str (o, "url")) && !dy_request_add_uri (r, s, error))
+  if ((s = yoink_json_str (o, "url")) && !yoink_request_add_uri (r, s, error))
     return NULL;
-  if ((a = dy_json_arr (o, "urls")) && !add_string_array (a, dy_request_add_uri, r, "link", error))
+  if ((a = yoink_json_arr (o, "urls")) && !add_string_array (a, yoink_request_add_uri, r, "link", error))
     return NULL;
-  if ((a = dy_json_arr (o, "headers")) && !add_string_array (a, dy_request_add_header, r, "header", error))
+  if ((a = yoink_json_arr (o, "headers")) && !add_string_array (a, yoink_request_add_header, r, "header", error))
     return NULL;
-  if ((s = dy_json_str (o, "referer")) && *s && !set_plain_string (&r->referer, "referer", s, error))
+  if ((s = yoink_json_str (o, "referer")) && *s && !set_plain_string (&r->referer, "referer", s, error))
     return NULL;
-  if ((s = dy_json_str (o, "userAgent")) && *s && !set_plain_string (&r->user_agent, "user agent", s, error))
+  if ((s = yoink_json_str (o, "userAgent")) && *s && !set_plain_string (&r->user_agent, "user agent", s, error))
     return NULL;
-  if ((s = dy_json_str (o, "filename")) && *s && !dy_request_set_out (r, s, error))
+  if ((s = yoink_json_str (o, "filename")) && *s && !yoink_request_set_out (r, s, error))
     return NULL;
 
   if (r->uris->len == 0) {
@@ -123,7 +123,7 @@ dy_request_from_json (JsonObject *o, GError **error)
 }
 
 JsonObject *
-dy_request_to_options (const DyRequest *r)
+yoink_request_to_options (const YoinkRequest *r)
 {
   JsonObject *opts = json_object_new ();
 

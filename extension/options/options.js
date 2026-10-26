@@ -35,10 +35,10 @@ async function checkDy() {
   try {
     const reply = await pingDy();
     status.dataset.state = 'ok';
-    $('status-text').textContent = `Connected to DY ${reply.version}`;
+    $('status-text').textContent = `Connected to Yoink ${reply.version}`;
   } catch (err) {
     status.dataset.state = 'error';
-    $('status-text').textContent = `Can't reach DY (${err.message}). Run "make install" in the DY folder.`;
+    $('status-text').textContent = `Can't reach Yoink (${err.message}). Run "make install" in the Yoink folder.`;
   }
 }
 

@@ -2,16 +2,16 @@
 
 #include "ui/support/format.h"
 
-struct _DyFooter {
+struct _YoinkFooter {
   GtkBox    parent_instance;
   GtkLabel *down;
   GtkLabel *up;
 };
 
-G_DEFINE_FINAL_TYPE (DyFooter, dy_footer, GTK_TYPE_BOX)
+G_DEFINE_FINAL_TYPE (YoinkFooter, yoink_footer, GTK_TYPE_BOX)
 
 static void
-dy_footer_class_init (DyFooterClass *klass)
+yoink_footer_class_init (YoinkFooterClass *klass)
 {
 }
 
@@ -24,11 +24,11 @@ speed_label (void)
 }
 
 static void
-dy_footer_init (DyFooter *self)
+yoink_footer_init (YoinkFooter *self)
 {
   gtk_box_set_spacing (GTK_BOX (self), 6);
   gtk_widget_set_halign (GTK_WIDGET (self), GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (GTK_WIDGET (self), "dy-footer");
+  gtk_widget_add_css_class (GTK_WIDGET (self), "yoink-footer");
 
   self->down = speed_label ();
   self->up = speed_label ();
@@ -43,17 +43,17 @@ dy_footer_init (DyFooter *self)
   gtk_box_append (GTK_BOX (self), GTK_WIDGET (self->up));
 }
 
-DyFooter *
-dy_footer_new (void)
+YoinkFooter *
+yoink_footer_new (void)
 {
-  return g_object_new (DY_TYPE_FOOTER, "orientation", GTK_ORIENTATION_HORIZONTAL, NULL);
+  return g_object_new (YOINK_TYPE_FOOTER, "orientation", GTK_ORIENTATION_HORIZONTAL, NULL);
 }
 
 void
-dy_footer_set_speeds (DyFooter *self, gint64 download, gint64 upload)
+yoink_footer_set_speeds (YoinkFooter *self, gint64 download, gint64 upload)
 {
-  g_autofree char *down = dy_format_speed (download);
-  g_autofree char *up = dy_format_speed (upload);
+  g_autofree char *down = yoink_format_speed (download);
+  g_autofree char *up = yoink_format_speed (upload);
   gtk_label_set_text (self->down, down);
   gtk_label_set_text (self->up, up);
 }

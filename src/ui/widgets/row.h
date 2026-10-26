@@ -7,16 +7,16 @@
 /* One download in the list: icon, name, progress bar, status line and the
  * pause/resume/retry, show-in-folder and remove buttons. Buttons fire app
  * actions with the gid as target. */
-#define DY_TYPE_ROW (dy_row_get_type ())
-G_DECLARE_FINAL_TYPE (DyRow, dy_row, DY, ROW, GtkListBoxRow)
+#define YOINK_TYPE_ROW (yoink_row_get_type ())
+G_DECLARE_FINAL_TYPE (YoinkRow, yoink_row, YOINK, ROW, GtkListBoxRow)
 
-DyRow      *dy_row_new          (const char *gid);
-void        dy_row_update       (DyRow *self, const DyItem *item);
+YoinkRow      *yoink_row_new          (const char *gid);
+void        yoink_row_update       (YoinkRow *self, const YoinkItem *item);
 
-const char *dy_row_get_gid      (DyRow *self);
-const char *dy_row_get_path     (DyRow *self);
-DyState     dy_row_get_state    (DyRow *self);
+const char *yoink_row_get_gid      (YoinkRow *self);
+const char *yoink_row_get_path     (YoinkRow *self);
+YoinkState     yoink_row_get_state    (YoinkRow *self);
 
-int         dy_row_get_sort_key (DyRow *self);
+int         yoink_row_get_sort_key (YoinkRow *self);
 /* TRUE if the key changed and the list needs re-sorting */
-gboolean    dy_row_set_sort_key (DyRow *self, int key);
+gboolean    yoink_row_set_sort_key (YoinkRow *self, int key);

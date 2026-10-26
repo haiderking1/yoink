@@ -6,21 +6,21 @@
 #include "downloads/request.h"
 
 /* Owns the aria2 daemon, the poller and the window, and glues them together. */
-#define DY_TYPE_APPLICATION (dy_application_get_type ())
-G_DECLARE_FINAL_TYPE (DyApplication, dy_application, DY, APPLICATION, AdwApplication)
+#define YOINK_TYPE_APPLICATION (yoink_application_get_type ())
+G_DECLARE_FINAL_TYPE (YoinkApplication, yoink_application, YOINK, APPLICATION, AdwApplication)
 
-DyApplication *dy_application_new              (void);
+YoinkApplication *yoink_application_new              (void);
 
 /* NULL while aria2 isn't running */
-Aria2Client   *dy_application_get_client       (DyApplication *self);
-const char    *dy_application_get_download_dir (DyApplication *self);
+Aria2Client   *yoink_application_get_client       (YoinkApplication *self);
+const char    *yoink_application_get_download_dir (YoinkApplication *self);
 /* NULL once the window is closed */
-GtkWidget     *dy_application_get_window       (DyApplication *self);
+GtkWidget     *yoink_application_get_window       (YoinkApplication *self);
 
 /* Adds downloads now, or as soon as aria2 is up. Takes ownership; either may be NULL. */
-void           dy_application_submit           (DyApplication *self, DyRequest *request, GListModel *torrents);
-void           dy_application_restart_aria2    (DyApplication *self);
+void           yoink_application_submit           (YoinkApplication *self, YoinkRequest *request, GListModel *torrents);
+void           yoink_application_restart_aria2    (YoinkApplication *self);
 /* poll aria2 right away instead of waiting for the next tick */
-void           dy_application_refresh          (DyApplication *self);
+void           yoink_application_refresh          (YoinkApplication *self);
 /* short message to the user (a toast) */
-void           dy_application_report           (DyApplication *self, const char *message);
+void           yoink_application_report           (YoinkApplication *self, const char *message);

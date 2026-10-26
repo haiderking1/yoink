@@ -8,7 +8,7 @@ window_of (GtkWidget *w)
 }
 
 void
-dy_launch_open (GtkWidget *from, const char *path)
+yoink_launch_open (GtkWidget *from, const char *path)
 {
   if (!path)
     return;
@@ -18,7 +18,7 @@ dy_launch_open (GtkWidget *from, const char *path)
 }
 
 void
-dy_launch_show_in_folder (GtkWidget *from, const char *path)
+yoink_launch_show_in_folder (GtkWidget *from, const char *path)
 {
   if (!path)
     return;

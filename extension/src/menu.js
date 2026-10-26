@@ -1,16 +1,16 @@
-// "Download with DY" on links and media, which works even while catching is paused.
+// "Yoink it" on links and media, which works even while catching is paused.
 
 import { sendToDy } from './native.js';
 import { buildRequest } from './request.js';
 import { showProblem } from './toolbar.js';
 
-const MENU_ID = 'dy-download';
+const MENU_ID = 'yoink-download';
 
 export function installMenu() {
   chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
       id: MENU_ID,
-      title: 'Download with DY',
+      title: 'Yoink it',
       contexts: ['link', 'image', 'video', 'audio'],
       targetUrlPatterns: ['http://*/*', 'https://*/*', 'ftp://*/*'],
     });

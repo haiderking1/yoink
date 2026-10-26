@@ -1,7 +1,7 @@
 {
-  "name": "dev.soka.dy",
-  "description": "Bridge between the DY browser extension and the DY download manager",
-  "path": "@BINDIR@/dy-host",
+  "name": "dev.soka.yoink",
+  "description": "Bridge between the Yoink browser extension and the Yoink download manager",
+  "path": "@BINDIR@/yoink-host",
   "type": "stdio",
   "allowed_origins": ["chrome-extension://lhgifgliafhapcnkidogoabkcobhehgi/"]
 }

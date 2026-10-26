@@ -1,5 +1,5 @@
 // Toolbar button: click to pause/resume catching downloads. The badge shows
-// "off" while paused and flashes "!" when DY couldn't take a download.
+// "off" while paused and flashes "!" when Yoink couldn't take a download.
 
 import { getSettings, onSettingsChanged, updateSettings } from './settings.js';
 
@@ -12,7 +12,7 @@ export async function refreshToolbar() {
   await chrome.action.setBadgeBackgroundColor({ color: '#5e5c64' });
   await chrome.action.setBadgeText({ text: enabled ? '' : 'off' });
   await chrome.action.setTitle({
-    title: enabled ? 'DY: catching downloads (click to pause)' : 'DY: paused (click to resume)',
+    title: enabled ? 'Yoink: catching downloads (click to pause)' : 'Yoink: paused (click to resume)',
   });
 }
 
@@ -20,7 +20,7 @@ export function showProblem(message) {
   clearTimeout(problemTimer);
   chrome.action.setBadgeBackgroundColor({ color: '#e01b24' });
   chrome.action.setBadgeText({ text: '!' });
-  chrome.action.setTitle({ title: `DY: ${message}` });
+  chrome.action.setTitle({ title: `Yoink: ${message}` });
   problemTimer = setTimeout(() => {
     problemTimer = null;
     refreshToolbar();

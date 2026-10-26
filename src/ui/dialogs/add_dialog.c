@@ -13,7 +13,7 @@ on_response (AdwAlertDialog *dialog, const char *response, GtkEditable *entry)
   if (g_str_equal (response, "add"))
     gtk_widget_activate_action (window, "app.add-links", "s", gtk_editable_get_text (entry));
   else if (g_str_equal (response, "torrent"))
-    dy_torrent_picker_present (window);
+    yoink_torrent_picker_present (window);
 }
 
 static void
@@ -29,14 +29,14 @@ on_clipboard_text (GObject *src, GAsyncResult *res, gpointer user_data)
   g_autoptr (GtkEditable) entry = user_data;
   g_autofree char *text = gdk_clipboard_read_text_finish (GDK_CLIPBOARD (src), res, NULL);
 
-  if (text && dy_is_link (g_strstrip (text)) && !*gtk_editable_get_text (entry)) {
+  if (text && yoink_is_link (g_strstrip (text)) && !*gtk_editable_get_text (entry)) {
     gtk_editable_set_text (entry, text);
     gtk_editable_select_region (entry, 0, -1);
   }
 }
 
 void
-dy_add_dialog_present (GtkWidget *parent)
+yoink_add_dialog_present (GtkWidget *parent)
 {
   AdwDialog *dialog = adw_alert_dialog_new ("Add Download", "Paste one or more links, or a magnet link.");
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (dialog);

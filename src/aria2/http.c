@@ -33,7 +33,7 @@ parse_status (const guint8 *data, gsize len)
 }
 
 GBytes *
-dy_http_post_json (guint16 port, const char *path, const char *body, GCancellable *cancel, GError **error)
+yoink_http_post_json (guint16 port, const char *path, const char *body, GCancellable *cancel, GError **error)
 {
   g_autoptr (GSocketClient) client = g_socket_client_new ();
   g_socket_client_set_timeout (client, TIMEOUT_SECONDS);

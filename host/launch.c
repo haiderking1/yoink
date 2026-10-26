@@ -4,29 +4,29 @@
 #include <string.h>
 #include <unistd.h>
 
-#define DY_BUS_NAME "dev.soka.dy"
+#define YOINK_BUS_NAME "dev.soka.yoink"
 
-/* dy-host is installed next to dy; fall back to PATH. */
+/* yoink-host is installed next to yoink; fall back to PATH. */
 static char *
-find_dy (GError **error)
+find_yoink (GError **error)
 {
   g_autofree char *self = g_file_read_link ("/proc/self/exe", NULL);
   if (self) {
     g_autofree char *dir = g_path_get_dirname (self);
-    char *sibling = g_build_filename (dir, "dy", NULL);
+    char *sibling = g_build_filename (dir, "yoink", NULL);
     if (g_file_test (sibling, G_FILE_TEST_IS_EXECUTABLE))
       return sibling;
     g_free (sibling);
   }
 
-  char *found = g_find_program_in_path ("dy");
+  char *found = g_find_program_in_path ("yoink");
   if (!found)
-    g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND, "Couldn't find the dy program");
+    g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND, "Couldn't find the yoink program");
   return found;
 }
 
 static gboolean
-dy_is_running (void)
+yoink_is_running (void)
 {
   g_autoptr (GDBusConnection) bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
   if (!bus)
@@ -34,7 +34,7 @@ dy_is_running (void)
 
   g_autoptr (GVariant) reply = g_dbus_connection_call_sync (bus, "org.freedesktop.DBus", "/org/freedesktop/DBus",
                                                             "org.freedesktop.DBus", "NameHasOwner",
-                                                            g_variant_new ("(s)", DY_BUS_NAME),
+                                                            g_variant_new ("(s)", YOINK_BUS_NAME),
                                                             G_VARIANT_TYPE ("(b)"), G_DBUS_CALL_FLAGS_NONE,
                                                             2000, NULL, NULL);
   gboolean owned = FALSE;
@@ -43,7 +43,7 @@ dy_is_running (void)
   return owned;
 }
 
-/* The browser may kill our process group once we reply; DY must outlive us. */
+/* The browser may kill our process group once we reply; Yoink must outlive us. */
 static void
 detach (gpointer unused)
 {
@@ -51,12 +51,12 @@ detach (gpointer unused)
 }
 
 static gboolean
-forward_to_running (const char *dy, const char *request_json, GError **error)
+forward_to_running (const char *yoink, const char *request_json, GError **error)
 {
   g_autoptr (GSubprocessLauncher) launcher =
     g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_STDIN_PIPE | G_SUBPROCESS_FLAGS_STDOUT_SILENCE |
                                G_SUBPROCESS_FLAGS_STDERR_PIPE);
-  g_autoptr (GSubprocess) proc = g_subprocess_launcher_spawn (launcher, error, dy, "--request-stdin", NULL);
+  g_autoptr (GSubprocess) proc = g_subprocess_launcher_spawn (launcher, error, yoink, "--request-stdin", NULL);
   if (!proc)
     return FALSE;
 
@@ -67,23 +67,23 @@ forward_to_running (const char *dy, const char *request_json, GError **error)
   if (g_subprocess_get_if_exited (proc) && g_subprocess_get_exit_status (proc) == 0)
     return TRUE;
 
-  /* dy prints "dy: <reason>" */
+  /* yoink prints "yoink: <reason>" */
   const char *reason = err_out ? g_strstrip (err_out) : "";
-  if (g_str_has_prefix (reason, "dy: "))
+  if (g_str_has_prefix (reason, "yoink: "))
     reason += 4;
-  g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED, *reason ? reason : "DY rejected the request");
+  g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED, *reason ? reason : "Yoink rejected the request");
   return FALSE;
 }
 
 static gboolean
-start_with_request (const char *dy, const char *request_json, GError **error)
+start_with_request (const char *yoink, const char *request_json, GError **error)
 {
   g_autoptr (GSubprocessLauncher) launcher =
     g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_STDIN_PIPE | G_SUBPROCESS_FLAGS_STDOUT_SILENCE |
                                G_SUBPROCESS_FLAGS_STDERR_SILENCE);
   g_subprocess_launcher_set_child_setup (launcher, detach, NULL, NULL);
 
-  g_autoptr (GSubprocess) proc = g_subprocess_launcher_spawn (launcher, error, dy, "--request-stdin", NULL);
+  g_autoptr (GSubprocess) proc = g_subprocess_launcher_spawn (launcher, error, yoink, "--request-stdin", NULL);
   if (!proc)
     return FALSE;
 
@@ -93,12 +93,12 @@ start_with_request (const char *dy, const char *request_json, GError **error)
 }
 
 gboolean
-dy_host_launch (const char *request_json, GError **error)
+yoink_host_launch (const char *request_json, GError **error)
 {
-  g_autofree char *dy = find_dy (error);
-  if (!dy)
+  g_autofree char *yoink = find_yoink (error);
+  if (!yoink)
     return FALSE;
 
-  return dy_is_running () ? forward_to_running (dy, request_json, error)
-                          : start_with_request (dy, request_json, error);
+  return yoink_is_running () ? forward_to_running (yoink, request_json, error)
+                             : start_with_request (yoink, request_json, error);
 }

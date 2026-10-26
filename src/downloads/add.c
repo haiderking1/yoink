@@ -5,7 +5,7 @@ typedef struct {
   guint        pending;
   guint        added;
   char        *error;
-  DyAddDone    done;
+  YoinkAddDone done;
   gpointer     user_data;
 } Batch;
 
@@ -15,7 +15,7 @@ typedef struct {
 } TorrentLoad;
 
 static Batch *
-batch_new (Aria2Client *client, guint pending, DyAddDone done, gpointer user_data)
+batch_new (Aria2Client *client, guint pending, YoinkAddDone done, gpointer user_data)
 {
   Batch *b = g_new0 (Batch, 1);
   b->client = aria2_client_ref (client);
@@ -52,7 +52,7 @@ on_added (JsonNode *result, const GError *error, gpointer user_data)
 }
 
 void
-dy_add_request (Aria2Client *client, const DyRequest *request, DyAddDone done, gpointer user_data)
+yoink_add_request (Aria2Client *client, const YoinkRequest *request, YoinkAddDone done, gpointer user_data)
 {
   if (request->uris->len == 0) {
     if (done)
@@ -61,7 +61,7 @@ dy_add_request (Aria2Client *client, const DyRequest *request, DyAddDone done, g
   }
 
   Batch *b = batch_new (client, request->uris->len, done, user_data);
-  g_autoptr (JsonObject) options = dy_request_to_options (request);
+  g_autoptr (JsonObject) options = yoink_request_to_options (request);
 
   /* one addUri per link: several uris in one call means mirrors of the same file */
   for (guint i = 0; i < request->uris->len; i++) {
@@ -97,7 +97,7 @@ on_torrent_loaded (GObject *src, GAsyncResult *res, gpointer user_data)
 }
 
 void
-dy_add_torrents (Aria2Client *client, GListModel *files, DyAddDone done, gpointer user_data)
+yoink_add_torrents (Aria2Client *client, GListModel *files, YoinkAddDone done, gpointer user_data)
 {
   guint n = g_list_model_get_n_items (files);
   if (n == 0) {

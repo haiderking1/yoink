@@ -1,4 +1,4 @@
-/* dy-host: Chrome native messaging bridge between the DY extension and DY.
+/* yoink-host: Chrome native messaging bridge between the Yoink extension and Yoink.
  * Chrome starts it, talks over stdin/stdout, and stops it when done. */
 
 #include <gio/gunixinputstream.h>
@@ -15,19 +15,19 @@ main (int argc, char **argv)
 
   for (;;) {
     g_autoptr (GError) error = NULL;
-    g_autoptr (JsonNode) message = dy_host_read_message (in, &error);
+    g_autoptr (JsonNode) message = yoink_host_read_message (in, &error);
 
     if (!message) {
       if (error) {
-        g_printerr ("dy-host: %s\n", error->message);
+        g_printerr ("yoink-host: %s\n", error->message);
         return 1;
       }
       return 0;  /* browser closed the pipe */
     }
 
-    g_autoptr (JsonNode) answer = dy_host_handle (message);
-    if (!dy_host_write_message (out, answer, &error)) {
-      g_printerr ("dy-host: %s\n", error->message);
+    g_autoptr (JsonNode) answer = yoink_host_handle (message);
+    if (!yoink_host_write_message (out, answer, &error)) {
+      g_printerr ("yoink-host: %s\n", error->message);
       return 1;
     }
   }

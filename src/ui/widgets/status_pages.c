@@ -23,7 +23,7 @@ pill_button (const char *label, const char *action)
 }
 
 GtkWidget *
-dy_status_page_starting_new (void)
+yoink_status_page_starting_new (void)
 {
   GtkWidget *p = page (NULL, "Starting aria2…", NULL);
   GtkWidget *spinner = adw_spinner_new ();
@@ -33,7 +33,7 @@ dy_status_page_starting_new (void)
 }
 
 GtkWidget *
-dy_status_page_empty_new (void)
+yoink_status_page_empty_new (void)
 {
   GtkWidget *p = page ("folder-download-symbolic", "No Downloads",
                        "Add a link with the + button, or drop one onto this window");
@@ -42,7 +42,7 @@ dy_status_page_empty_new (void)
 }
 
 GtkWidget *
-dy_status_page_failed_new (void)
+yoink_status_page_failed_new (void)
 {
   GtkWidget *p = page ("dialog-warning-symbolic", "", NULL);
   adw_status_page_set_child (ADW_STATUS_PAGE (p), pill_button ("_Try Again", "app.restart"));

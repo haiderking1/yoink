@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="rim" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#c4c4c4"/>
+      <stop offset="0.5" stop-color="#2c2c2c"/>
+      <stop offset="1" stop-color="#7a7a7a"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#161616"/>
+      <stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="ink" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0.3" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#b8b8b8"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#rim)"/>
+  <rect x="6" y="6" width="116" height="116" rx="26" fill="url(#tile)"/>
+
+  <!-- "Yo" in Adwaita Sans, weight 800, converted to outlines -->
+  <path fill="url(#ink)" d="M37.49 89.00L37.49 70.88L18.90 39.00L32.79 39.00L40.64 54.34Q41.79 56.55 42.69 58.80Q43.60 61.05 44.54 64.03L42.42 64.03Q43.30 61.01 44.13 58.77Q45.01 56.52 46.11 54.34L53.60 39.00L67.42 39.00L49.27 70.88L49.27 89.00L37.49 89.00M90.28 89.70Q84.40 89.70 80.17 87.29Q75.95 84.84 73.66 80.51Q71.42 76.15 71.42 70.38Q71.42 64.57 73.66 60.24Q75.95 55.88 80.17 53.46Q84.40 51.01 90.28 51.01Q96.15 51.01 100.38 53.46Q104.60 55.88 106.85 60.24Q109.10 64.57 109.10 70.38Q109.10 76.15 106.85 80.51Q104.60 84.84 100.38 87.29Q96.15 89.70 90.28 89.70M90.28 80.74Q92.52 80.74 94.07 79.44Q95.61 78.13 96.38 75.78Q97.19 73.43 97.19 70.31Q97.19 67.19 96.38 64.87Q95.61 62.52 94.07 61.25Q92.52 59.97 90.28 59.97Q88.03 59.97 86.48 61.25Q84.94 62.52 84.13 64.87Q83.36 67.19 83.36 70.31Q83.36 73.43 84.13 75.78Q84.94 78.13 86.48 79.44Q88.03 80.74 90.28 80.74"/>
+</svg>

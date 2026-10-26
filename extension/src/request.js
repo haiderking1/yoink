@@ -1,4 +1,4 @@
-// Builds what DY needs to fetch a URL the way the browser would: same
+// Builds what Yoink needs to fetch a URL the way the browser would: same
 // cookies, referer and user agent, so logged-in downloads keep working.
 
 export async function buildRequest({ url, referrer, filename }) {

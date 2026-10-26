@@ -1,10 +1,10 @@
 [Desktop Entry]
 Type=Application
-Name=DY
+Name=Yoink
 GenericName=Download Manager
 Comment=A small download manager powered by aria2
-Exec=@BINDIR@/dy
-Icon=dev.soka.dy
+Exec=@BINDIR@/yoink
+Icon=dev.soka.yoink
 Terminal=false
 Categories=Network;FileTransfer;
 Keywords=download;aria2;torrent;magnet;

@@ -1,10 +1,10 @@
-// Talks to dy-host, the native messaging bridge installed with DY.
+// Talks to yoink-host, the native messaging bridge installed with Yoink.
 
-const HOST = 'dev.soka.dy';
+const HOST = 'dev.soka.yoink';
 
 async function send(message) {
   const reply = await chrome.runtime.sendNativeMessage(HOST, message);
-  if (!reply?.ok) throw new Error(reply?.error || 'No reply from DY');
+  if (!reply?.ok) throw new Error(reply?.error || 'No reply from Yoink');
   return reply;
 }
 

@@ -8,7 +8,7 @@ static const char style_css[] = {
 };
 
 void
-dy_style_load (void)
+yoink_style_load (void)
 {
   g_autoptr (GtkCssProvider) css = gtk_css_provider_new ();
   gtk_css_provider_load_from_string (css, style_css);

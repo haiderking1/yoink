@@ -1,5 +1,6 @@
 #include "aria2/daemon.h"
 
+#include <glib/gstdio.h>
 #include <signal.h>
 #include <unistd.h>
 
@@ -38,15 +39,18 @@ pick_free_port (GError **error)
 static gboolean
 ensure_session_file (const char *session_file, GError **error)
 {
-  /* aria2 refuses to start if --input-file doesn't exist */
-  if (g_file_test (session_file, G_FILE_TEST_EXISTS))
-    return TRUE;
-
   g_autofree char *dir = g_path_get_dirname (session_file);
-  /* 0700: the session can contain cookies forwarded from the browser */
-  if (g_mkdir_with_parents (dir, 0700) != 0) {
+  /* 0700 every time, not just on creation: the session can contain cookies
+   * forwarded from the browser, and aria2 rewrites the file with its own mode */
+  if (g_mkdir_with_parents (dir, 0700) != 0 || g_chmod (dir, 0700) != 0) {
     g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errno), "Couldn't create %s", dir);
     return FALSE;
+  }
+
+  /* aria2 refuses to start if --input-file doesn't exist */
+  if (g_file_test (session_file, G_FILE_TEST_EXISTS)) {
+    g_chmod (session_file, 0600);  /* best effort, the dir already guards it */
+    return TRUE;
   }
   return g_file_set_contents_full (session_file, "", 0, G_FILE_SET_CONTENTS_NONE, 0600, error);
 }

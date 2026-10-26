@@ -7,21 +7,21 @@
 
 enum { GROUP_ACTIVE, GROUP_WAITING, GROUP_STOPPED, GROUP_STATS };
 
-struct _DyPoller {
-  Aria2Client *client;
-  DyPollFunc   fn;
-  gpointer     user_data;
-  guint        timer_id;
-  guint        soon_id;
-  gboolean     in_flight;
-  gboolean     dead;
-  int          refs;  /* main thread only: the owner plus a request in flight */
+struct _YoinkPoller {
+  Aria2Client  *client;
+  YoinkPollFunc fn;
+  gpointer      user_data;
+  guint         timer_id;
+  guint         soon_id;
+  gboolean      in_flight;
+  gboolean      dead;
+  int           refs;  /* main thread only: the owner plus a request in flight */
 };
 
-static void poll (DyPoller *p);
+static void poll (YoinkPoller *p);
 
 static void
-poller_unref (DyPoller *p)
+poller_unref (YoinkPoller *p)
 {
   if (--p->refs > 0)
     return;
@@ -33,7 +33,7 @@ static JsonArray *
 status_keys (void)
 {
   JsonArray *arr = json_array_new ();
-  for (const char *const *k = dy_item_status_keys (); *k; k++)
+  for (const char *const *k = yoink_item_status_keys (); *k; k++)
     json_array_add_string_element (arr, *k);
   return arr;
 }
@@ -49,7 +49,7 @@ range_params (void)
 }
 
 static void
-collect_group (DyPoller *p, JsonArray *results, guint group, GPtrArray *items)
+collect_group (YoinkPoller *p, JsonArray *results, guint group, GPtrArray *items)
 {
   JsonNode *node = aria2_multicall_value (results, group);
   JsonArray *list = node && JSON_NODE_HOLDS_ARRAY (node) ? json_node_get_array (node) : NULL;
@@ -58,15 +58,15 @@ collect_group (DyPoller *p, JsonArray *results, guint group, GPtrArray *items)
   for (guint i = 0; i < n; i++) {
     /* aria2 lists stopped downloads oldest first; show the newest first */
     guint index = group == GROUP_STOPPED ? n - 1 - i : i;
-    DyItem *item = dy_item_from_json (dy_json_arr_obj (list, index));
+    YoinkItem *item = yoink_item_from_json (yoink_json_arr_obj (list, index));
     if (!item)
       continue;
 
     /* Removed downloads and finished hand-offs aren't interesting;
      * drop them from aria2's memory too. */
-    if (group == GROUP_STOPPED && (item->state == DY_STATE_REMOVED || item->is_handoff)) {
+    if (group == GROUP_STOPPED && (item->state == YOINK_STATE_REMOVED || item->is_handoff)) {
       aria2_call_gid (p->client, "aria2.removeDownloadResult", item->gid, NULL, NULL);
-      dy_item_free (item);
+      yoink_item_free (item);
       continue;
     }
     g_ptr_array_add (items, item);
@@ -76,7 +76,7 @@ collect_group (DyPoller *p, JsonArray *results, guint group, GPtrArray *items)
 static void
 on_poll (JsonNode *result, const GError *error, gpointer user_data)
 {
-  DyPoller *p = user_data;
+  YoinkPoller *p = user_data;
   p->in_flight = FALSE;
 
   if (p->dead) {
@@ -91,18 +91,18 @@ on_poll (JsonNode *result, const GError *error, gpointer user_data)
   }
 
   JsonArray *results = json_node_get_array (result);
-  g_autoptr (GPtrArray) items = g_ptr_array_new_with_free_func ((GDestroyNotify) dy_item_free);
+  g_autoptr (GPtrArray) items = g_ptr_array_new_with_free_func ((GDestroyNotify) yoink_item_free);
   collect_group (p, results, GROUP_ACTIVE, items);
   collect_group (p, results, GROUP_WAITING, items);
   collect_group (p, results, GROUP_STOPPED, items);
 
   JsonNode *stat_node = aria2_multicall_value (results, GROUP_STATS);
   JsonObject *stat = stat_node && JSON_NODE_HOLDS_OBJECT (stat_node) ? json_node_get_object (stat_node) : NULL;
-  DyStats stats = {
-    .active = dy_json_num (stat, "numActive"),
-    .waiting = dy_json_num (stat, "numWaiting"),
-    .download_speed = dy_json_num (stat, "downloadSpeed"),
-    .upload_speed = dy_json_num (stat, "uploadSpeed"),
+  YoinkStats stats = {
+    .active = yoink_json_num (stat, "numActive"),
+    .waiting = yoink_json_num (stat, "numWaiting"),
+    .download_speed = yoink_json_num (stat, "downloadSpeed"),
+    .upload_speed = yoink_json_num (stat, "uploadSpeed"),
   };
 
   p->fn (items, &stats, NULL, p->user_data);
@@ -110,7 +110,7 @@ on_poll (JsonNode *result, const GError *error, gpointer user_data)
 }
 
 static void
-poll (DyPoller *p)
+poll (YoinkPoller *p)
 {
   if (p->in_flight || p->dead)
     return;
@@ -142,33 +142,33 @@ on_tick (gpointer user_data)
 static void
 on_soon (gpointer user_data)
 {
-  DyPoller *p = user_data;
+  YoinkPoller *p = user_data;
   p->soon_id = 0;
   poll (p);
 }
 
-DyPoller *
-dy_poller_new (Aria2Client *client, DyPollFunc fn, gpointer user_data)
+YoinkPoller *
+yoink_poller_new (Aria2Client *client, YoinkPollFunc fn, gpointer user_data)
 {
-  DyPoller *p = g_new0 (DyPoller, 1);
+  YoinkPoller *p = g_new0 (YoinkPoller, 1);
   p->client = aria2_client_ref (client);
   p->fn = fn;
   p->user_data = user_data;
   p->refs = 1;
   p->timer_id = g_timeout_add (INTERVAL_MS, on_tick, p);
-  dy_poller_poll_soon (p);
+  yoink_poller_poll_soon (p);
   return p;
 }
 
 void
-dy_poller_poll_soon (DyPoller *p)
+yoink_poller_poll_soon (YoinkPoller *p)
 {
   if (!p->soon_id)
     p->soon_id = g_timeout_add_once (SOON_MS, on_soon, p);
 }
 
 void
-dy_poller_free (DyPoller *p)
+yoink_poller_free (YoinkPoller *p)
 {
   if (!p)
     return;

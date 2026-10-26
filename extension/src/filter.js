@@ -1,4 +1,4 @@
-// Decides whether a browser download should go to DY: returns why it should
+// Decides whether a browser download should go to Yoink: returns why it should
 // stay in the browser, or null to take it over.
 
 import { wasPosted } from './post-tracker.js';

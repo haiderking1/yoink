@@ -5,7 +5,7 @@
 
 #define GLIDE_MS 900
 
-struct _DyRow {
+struct _YoinkRow {
   GtkListBoxRow parent_instance;
 
   GtkWidget    *icon;
@@ -20,37 +20,37 @@ struct _DyRow {
   char         *gid;
   char         *display_name;
   char         *path;
-  DyState       state;
+  YoinkState    state;
   gboolean      has_uri;
   gboolean      has_fraction;
   int           sort_key;
 };
 
-G_DEFINE_FINAL_TYPE (DyRow, dy_row, GTK_TYPE_LIST_BOX_ROW)
+G_DEFINE_FINAL_TYPE (YoinkRow, yoink_row, GTK_TYPE_LIST_BOX_ROW)
 
 static void
-dy_row_dispose (GObject *object)
+yoink_row_dispose (GObject *object)
 {
-  DyRow *self = DY_ROW (object);
+  YoinkRow *self = YOINK_ROW (object);
   g_clear_object (&self->glide);
-  G_OBJECT_CLASS (dy_row_parent_class)->dispose (object);
+  G_OBJECT_CLASS (yoink_row_parent_class)->dispose (object);
 }
 
 static void
-dy_row_finalize (GObject *object)
+yoink_row_finalize (GObject *object)
 {
-  DyRow *self = DY_ROW (object);
+  YoinkRow *self = YOINK_ROW (object);
   g_free (self->gid);
   g_free (self->display_name);
   g_free (self->path);
-  G_OBJECT_CLASS (dy_row_parent_class)->finalize (object);
+  G_OBJECT_CLASS (yoink_row_parent_class)->finalize (object);
 }
 
 static void
-dy_row_class_init (DyRowClass *klass)
+yoink_row_class_init (YoinkRowClass *klass)
 {
-  G_OBJECT_CLASS (klass)->dispose = dy_row_dispose;
-  G_OBJECT_CLASS (klass)->finalize = dy_row_finalize;
+  G_OBJECT_CLASS (klass)->dispose = yoink_row_dispose;
+  G_OBJECT_CLASS (klass)->finalize = yoink_row_finalize;
 }
 
 static GtkWidget *
@@ -77,13 +77,13 @@ caption_label (void)
 }
 
 static void
-on_open_clicked (GtkButton *button, DyRow *self)
+on_open_clicked (GtkButton *button, YoinkRow *self)
 {
-  dy_launch_show_in_folder (GTK_WIDGET (self), self->path);
+  yoink_launch_show_in_folder (GTK_WIDGET (self), self->path);
 }
 
 static void
-dy_row_init (DyRow *self)
+yoink_row_init (YoinkRow *self)
 {
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 14);
   gtk_widget_add_css_class (box, "dl-row");
@@ -129,10 +129,10 @@ dy_row_init (DyRow *self)
   adw_timed_animation_set_easing (ADW_TIMED_ANIMATION (self->glide), ADW_EASE_OUT_CUBIC);
 }
 
-DyRow *
-dy_row_new (const char *gid)
+YoinkRow *
+yoink_row_new (const char *gid)
 {
-  DyRow *self = g_object_new (DY_TYPE_ROW, NULL);
+  YoinkRow *self = g_object_new (YOINK_TYPE_ROW, NULL);
   self->gid = g_strdup (gid);
   gtk_actionable_set_action_target (GTK_ACTIONABLE (self->toggle_btn), "s", gid);
   gtk_actionable_set_action_target (GTK_ACTIONABLE (self->remove_btn), "s", gid);
@@ -140,15 +140,15 @@ dy_row_new (const char *gid)
 }
 
 static void
-set_state_class (GtkWidget *w, DyState state)
+set_state_class (GtkWidget *w, YoinkState state)
 {
-  for (DyState s = DY_STATE_UNKNOWN; s <= DY_STATE_REMOVED; s++)
-    gtk_widget_remove_css_class (w, dy_state_name (s));
-  gtk_widget_add_css_class (w, dy_state_name (state));
+  for (YoinkState s = YOINK_STATE_UNKNOWN; s <= YOINK_STATE_REMOVED; s++)
+    gtk_widget_remove_css_class (w, yoink_state_name (s));
+  gtk_widget_add_css_class (w, yoink_state_name (state));
 }
 
 static void
-set_fraction (DyRow *self, double frac)
+set_fraction (YoinkRow *self, double frac)
 {
   GtkProgressBar *bar = GTK_PROGRESS_BAR (self->progress);
   double cur = gtk_progress_bar_get_fraction (bar);
@@ -169,7 +169,7 @@ set_fraction (DyRow *self, double frac)
 }
 
 static void
-update_name (DyRow *self, const DyItem *item)
+update_name (YoinkRow *self, const YoinkItem *item)
 {
   if (g_strcmp0 (item->name, self->display_name) == 0)
     return;
@@ -188,11 +188,11 @@ update_name (DyRow *self, const DyItem *item)
 }
 
 static void
-update_buttons (DyRow *self)
+update_buttons (YoinkRow *self)
 {
-  gboolean complete = self->state == DY_STATE_COMPLETE;
-  gboolean paused = self->state == DY_STATE_PAUSED;
-  gboolean error = self->state == DY_STATE_ERROR;
+  gboolean complete = self->state == YOINK_STATE_COMPLETE;
+  gboolean paused = self->state == YOINK_STATE_PAUSED;
+  gboolean error = self->state == YOINK_STATE_ERROR;
 
   gtk_button_set_icon_name (GTK_BUTTON (self->toggle_btn),
                             paused ? "media-playback-start-symbolic" :
@@ -204,14 +204,14 @@ update_buttons (DyRow *self)
   gtk_widget_set_visible (self->toggle_btn, !complete && !(error && !self->has_uri));
 
   gtk_actionable_set_action_name (GTK_ACTIONABLE (self->remove_btn),
-                                  dy_state_is_stopped (self->state) ? "app.dismiss" : "app.cancel");
+                                  yoink_state_is_stopped (self->state) ? "app.dismiss" : "app.cancel");
 
   gtk_widget_set_visible (self->open_btn, complete);
   gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (self), complete);
 }
 
 void
-dy_row_update (DyRow *self, const DyItem *item)
+yoink_row_update (YoinkRow *self, const YoinkItem *item)
 {
   update_name (self, item);
   g_set_str (&self->path, item->path);
@@ -224,39 +224,39 @@ dy_row_update (DyRow *self, const DyItem *item)
     update_buttons (self);
   }
 
-  double frac = item->total > 0 ? (double) item->done / item->total : item->state == DY_STATE_COMPLETE;
+  double frac = item->total > 0 ? (double) item->done / item->total : item->state == YOINK_STATE_COMPLETE;
   set_fraction (self, frac);
 
-  g_autofree char *status = dy_format_status (item);
+  g_autofree char *status = yoink_format_status (item);
   gtk_label_set_text (GTK_LABEL (self->status), status);
 }
 
 const char *
-dy_row_get_gid (DyRow *self)
+yoink_row_get_gid (YoinkRow *self)
 {
   return self->gid;
 }
 
 const char *
-dy_row_get_path (DyRow *self)
+yoink_row_get_path (YoinkRow *self)
 {
   return self->path;
 }
 
-DyState
-dy_row_get_state (DyRow *self)
+YoinkState
+yoink_row_get_state (YoinkRow *self)
 {
   return self->state;
 }
 
 int
-dy_row_get_sort_key (DyRow *self)
+yoink_row_get_sort_key (YoinkRow *self)
 {
   return self->sort_key;
 }
 
 gboolean
-dy_row_set_sort_key (DyRow *self, int key)
+yoink_row_set_sort_key (YoinkRow *self, int key)
 {
   if (self->sort_key == key)
     return FALSE;

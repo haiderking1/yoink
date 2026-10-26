@@ -1,5 +1,5 @@
 // Remembers URLs the browser recently sent a non-GET request to. A download
-// that came straight out of a form POST can't be replayed by DY (it would
+// that came straight out of a form POST can't be replayed by Yoink (it would
 // GET the URL), so those stay in the browser.
 
 const TTL_MS = 60_000;

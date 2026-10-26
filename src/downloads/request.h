@@ -10,21 +10,21 @@ typedef struct {
   char      *referer;
   char      *user_agent;
   char      *out;       /* file name to save as */
-} DyRequest;
+} YoinkRequest;
 
-DyRequest  *dy_request_new        (void);
-void        dy_request_free       (DyRequest *r);
+YoinkRequest  *yoink_request_new        (void);
+void        yoink_request_free       (YoinkRequest *r);
 
 /* Validating constructor for untrusted input (the browser extension):
  * { "url" | "urls", "headers", "referer", "userAgent", "filename" } */
-DyRequest  *dy_request_from_json  (JsonObject *o, GError **error);
+YoinkRequest  *yoink_request_from_json  (JsonObject *o, GError **error);
 
 /* Validates and appends; FALSE (with error) if unsafe. */
-gboolean    dy_request_add_uri    (DyRequest *r, const char *uri, GError **error);
-gboolean    dy_request_add_header (DyRequest *r, const char *header, GError **error);
-gboolean    dy_request_set_out    (DyRequest *r, const char *name, GError **error);
+gboolean    yoink_request_add_uri    (YoinkRequest *r, const char *uri, GError **error);
+gboolean    yoink_request_add_header (YoinkRequest *r, const char *header, GError **error);
+gboolean    yoink_request_set_out    (YoinkRequest *r, const char *name, GError **error);
 
 /* aria2 per-download options for addUri; may be empty. */
-JsonObject *dy_request_to_options (const DyRequest *r);
+JsonObject *yoink_request_to_options (const YoinkRequest *r);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (DyRequest, dy_request_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (YoinkRequest, yoink_request_free)

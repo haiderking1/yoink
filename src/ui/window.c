@@ -7,43 +7,43 @@
 #include "ui/widgets/header.h"
 #include "ui/widgets/status_pages.h"
 
-struct _DyWindow {
+struct _YoinkWindow {
   AdwApplicationWindow parent_instance;
 
-  AdwToastOverlay *toasts;
-  AdwWindowTitle  *title;
-  GtkStack        *stack;
-  AdwStatusPage   *failed_page;
-  DyDownloadList  *list;
-  DyFooter        *footer;
+  AdwToastOverlay   *toasts;
+  AdwWindowTitle    *title;
+  GtkStack          *stack;
+  AdwStatusPage     *failed_page;
+  YoinkDownloadList *list;
+  YoinkFooter       *footer;
 };
 
-G_DEFINE_FINAL_TYPE (DyWindow, dy_window, ADW_TYPE_APPLICATION_WINDOW)
+G_DEFINE_FINAL_TYPE (YoinkWindow, yoink_window, ADW_TYPE_APPLICATION_WINDOW)
 
 static void
-dy_window_class_init (DyWindowClass *klass)
+yoink_window_class_init (YoinkWindowClass *klass)
 {
 }
 
 static void
-dy_window_init (DyWindow *self)
+yoink_window_init (YoinkWindow *self)
 {
-  gtk_window_set_title (GTK_WINDOW (self), "DY");
+  gtk_window_set_title (GTK_WINDOW (self), "Yoink");
   gtk_window_set_default_size (GTK_WINDOW (self), 720, 560);
 
-  GtkWidget *header = dy_header_new (&self->title);
+  GtkWidget *header = yoink_header_new (&self->title);
 
   self->stack = GTK_STACK (gtk_stack_new ());
   gtk_stack_set_transition_type (self->stack, GTK_STACK_TRANSITION_TYPE_CROSSFADE);
 
-  self->list = dy_download_list_new ();
-  self->failed_page = ADW_STATUS_PAGE (dy_status_page_failed_new ());
-  gtk_stack_add_named (self->stack, dy_status_page_starting_new (), "starting");
-  gtk_stack_add_named (self->stack, dy_status_page_empty_new (), "empty");
+  self->list = yoink_download_list_new ();
+  self->failed_page = ADW_STATUS_PAGE (yoink_status_page_failed_new ());
+  gtk_stack_add_named (self->stack, yoink_status_page_starting_new (), "starting");
+  gtk_stack_add_named (self->stack, yoink_status_page_empty_new (), "empty");
   gtk_stack_add_named (self->stack, GTK_WIDGET (self->list), "list");
   gtk_stack_add_named (self->stack, GTK_WIDGET (self->failed_page), "failed");
 
-  self->footer = dy_footer_new ();
+  self->footer = yoink_footer_new ();
 
   GtkWidget *view = adw_toolbar_view_new ();
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (view), header);
@@ -54,23 +54,23 @@ dy_window_init (DyWindow *self)
   adw_toast_overlay_set_child (self->toasts, view);
   adw_application_window_set_content (ADW_APPLICATION_WINDOW (self), GTK_WIDGET (self->toasts));
 
-  dy_drop_install (GTK_WIDGET (self));
+  yoink_drop_install (GTK_WIDGET (self));
 }
 
-DyWindow *
-dy_window_new (GtkApplication *app)
+YoinkWindow *
+yoink_window_new (GtkApplication *app)
 {
-  return g_object_new (DY_TYPE_WINDOW, "application", app, NULL);
+  return g_object_new (YOINK_TYPE_WINDOW, "application", app, NULL);
 }
 
 void
-dy_window_show_starting (DyWindow *self)
+yoink_window_show_starting (YoinkWindow *self)
 {
   gtk_stack_set_visible_child_name (self->stack, "starting");
 }
 
 void
-dy_window_show_failed (DyWindow *self, const char *title, const char *description)
+yoink_window_show_failed (YoinkWindow *self, const char *title, const char *description)
 {
   adw_status_page_set_title (self->failed_page, title);
   adw_status_page_set_description (self->failed_page, description);
@@ -79,27 +79,27 @@ dy_window_show_failed (DyWindow *self, const char *title, const char *descriptio
 }
 
 void
-dy_window_update (DyWindow *self, GPtrArray *items, const DyStats *stats)
+yoink_window_update (YoinkWindow *self, GPtrArray *items, const YoinkStats *stats)
 {
-  dy_download_list_update (self->list, items);
-  gtk_stack_set_visible_child_name (self->stack, dy_download_list_get_count (self->list) ? "list" : "empty");
+  yoink_download_list_update (self->list, items);
+  gtk_stack_set_visible_child_name (self->stack, yoink_download_list_get_count (self->list) ? "list" : "empty");
 
-  dy_footer_set_speeds (self->footer, stats->download_speed, stats->upload_speed);
+  yoink_footer_set_speeds (self->footer, stats->download_speed, stats->upload_speed);
 
-  g_autofree char *subtitle = dy_format_subtitle (stats);
+  g_autofree char *subtitle = yoink_format_subtitle (stats);
   adw_window_title_set_subtitle (self->title, subtitle);
 }
 
 void
-dy_window_clear (DyWindow *self)
+yoink_window_clear (YoinkWindow *self)
 {
-  dy_download_list_clear (self->list);
-  dy_footer_set_speeds (self->footer, 0, 0);
+  yoink_download_list_clear (self->list);
+  yoink_footer_set_speeds (self->footer, 0, 0);
   adw_window_title_set_subtitle (self->title, "");
 }
 
 void
-dy_window_toast (DyWindow *self, const char *message)
+yoink_window_toast (YoinkWindow *self, const char *message)
 {
   AdwToast *t = adw_toast_new (message);
   adw_toast_set_use_markup (t, FALSE);

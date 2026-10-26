@@ -51,10 +51,10 @@ progressbar.dl-progress.waiting > trough > progress {
 }
 
 /* Footer with global speeds */
-.dy-footer {
+.yoink-footer {
   padding: 6px 12px;
 }
 
-.dy-footer image {
+.yoink-footer image {
   opacity: 0.55;
 }

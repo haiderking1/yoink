@@ -4,4 +4,4 @@
 
 /* Asks for links (pre-filled from the clipboard) and fires app.add-links,
  * or hands over to the torrent picker. */
-void dy_add_dialog_present (GtkWidget *parent);
+void yoink_add_dialog_present (GtkWidget *parent);
