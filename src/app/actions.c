@@ -1,5 +1,6 @@
 #include "app/actions.h"
 
+#include "app/settings.h"
 #include "downloads/control.h"
 #include "downloads/removal.h"
 #include "downloads/retry.h"
@@ -59,16 +60,21 @@ act_add_links (GSimpleAction *a, GVariant *p, gpointer app)
     yoink_application_report (app, "No links found");
     return;
   }
-  yoink_application_submit (app, g_steal_pointer (&req), NULL);
+  yoink_application_submit (app, g_steal_pointer (&req));
 }
 
 static void
-act_add_torrent (GSimpleAction *a, GVariant *p, gpointer app)
+act_add_torrents (GSimpleAction *a, GVariant *p, gpointer app)
 {
-  GListStore *files = g_list_store_new (G_TYPE_FILE);
-  g_autoptr (GFile) file = g_file_new_for_uri (g_variant_get_string (p, NULL));
-  g_list_store_append (files, file);
-  yoink_application_submit (app, NULL, G_LIST_MODEL (files));
+  g_autoptr (YoinkRequest) req = yoink_request_new ();
+  g_autofree const char **uris = g_variant_get_strv (p, NULL);
+
+  for (const char **u = uris; *u; u++) {
+    g_autoptr (GFile) file = g_file_new_for_uri (*u);
+    yoink_request_add_torrent (req, file);
+  }
+  if (req->torrents->len)
+    yoink_application_submit (app, g_steal_pointer (&req));
 }
 
 /* ---------- per download ---------- */
@@ -90,7 +96,8 @@ static void act_clear_finished (GSimpleAction *a, GVariant *p, gpointer app) { r
 static void
 act_open_folder (GSimpleAction *a, GVariant *p, gpointer app)
 {
-  yoink_launch_open (yoink_application_get_window (app), yoink_application_get_download_dir (app));
+  g_autofree char *dir = yoink_settings_get_save_dir ();
+  yoink_launch_open (yoink_application_get_window (app), dir);
 }
 
 static void
@@ -118,13 +125,13 @@ yoink_actions_install (YoinkApplication *app)
 {
   static const GActionEntry entries[] = {
     { .name = "add",            .activate = act_add },
-    { .name = "add-links",      .activate = act_add_links,   .parameter_type = "s" },
-    { .name = "add-torrent",    .activate = act_add_torrent, .parameter_type = "s" },
-    { .name = "pause",          .activate = act_pause,       .parameter_type = "s" },
-    { .name = "resume",         .activate = act_resume,      .parameter_type = "s" },
-    { .name = "retry",          .activate = act_retry,       .parameter_type = "s" },
-    { .name = "cancel",         .activate = act_cancel,      .parameter_type = "s" },
-    { .name = "dismiss",        .activate = act_dismiss,     .parameter_type = "s" },
+    { .name = "add-links",      .activate = act_add_links,    .parameter_type = "s" },
+    { .name = "add-torrents",   .activate = act_add_torrents, .parameter_type = "as" },
+    { .name = "pause",          .activate = act_pause,        .parameter_type = "s" },
+    { .name = "resume",         .activate = act_resume,       .parameter_type = "s" },
+    { .name = "retry",          .activate = act_retry,        .parameter_type = "s" },
+    { .name = "cancel",         .activate = act_cancel,       .parameter_type = "s" },
+    { .name = "dismiss",        .activate = act_dismiss,      .parameter_type = "s" },
     { .name = "pause-all",      .activate = act_pause_all },
     { .name = "resume-all",     .activate = act_resume_all },
     { .name = "clear-finished", .activate = act_clear_finished },

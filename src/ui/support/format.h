@@ -9,3 +9,5 @@ char *yoink_format_eta      (gint64 seconds);
 char *yoink_format_status   (const YoinkItem *item);
 /* "2 active · 1 queued", or "" when idle */
 char *yoink_format_subtitle (const YoinkStats *stats);
+/* "~/Downloads" for paths inside the home folder */
+char *yoink_format_path     (const char *path);

@@ -6,17 +6,21 @@ static void
 drop_files (GtkWidget *target, GSList *files)
 {
   g_autoptr (GString) links = g_string_new (NULL);
+  g_autoptr (GStrvBuilder) torrents = g_strv_builder_new ();
 
   for (GSList *l = files; l; l = l->next) {
     GFile *file = l->data;
     g_autofree char *uri = g_file_get_uri (file);
 
     if (g_file_has_uri_scheme (file, "file") && g_str_has_suffix (uri, ".torrent"))
-      gtk_widget_activate_action (target, "app.add-torrent", "s", uri);
+      g_strv_builder_add (torrents, uri);
     else if (yoink_is_link (uri))
       g_string_append_printf (links, "%s\n", uri);
   }
 
+  g_auto (GStrv) torrent_uris = g_strv_builder_end (torrents);
+  if (torrent_uris[0])
+    gtk_widget_activate_action (target, "app.add-torrents", "^as", torrent_uris);
   if (links->len)
     gtk_widget_activate_action (target, "app.add-links", "s", links->str);
 }

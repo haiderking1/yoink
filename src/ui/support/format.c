@@ -1,5 +1,7 @@
 #include "ui/support/format.h"
 
+#include <string.h>
+
 char *
 yoink_format_speed (gint64 bytes_per_sec)
 {
@@ -69,4 +71,15 @@ yoink_format_subtitle (const YoinkStats *stats)
   if (stats->waiting)
     return g_strdup_printf ("%" G_GINT64_FORMAT " queued", stats->waiting);
   return g_strdup ("");
+}
+
+char *
+yoink_format_path (const char *path)
+{
+  const char *home = g_get_home_dir ();
+  gsize n = strlen (home);
+
+  if (g_str_has_prefix (path, home) && (path[n] == '/' || path[n] == '\0'))
+    return g_strconcat ("~", path + n, NULL);
+  return g_strdup (path);
 }

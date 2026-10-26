@@ -68,7 +68,7 @@ on_stdin_read (GObject *src, GAsyncResult *res, gpointer user_data)
   JsonNode *root = json_parser_get_root (parser);
   YoinkRequest *request = JSON_NODE_HOLDS_OBJECT (root) ? yoink_request_from_json (json_node_get_object (root), &error) : NULL;
   if (request)
-    sr->submit (request, NULL, sr->user_data);
+    sr->submit (request, sr->user_data);
   else
     fail (sr->cmd, error ? error->message : "Request must be a JSON object");
 
@@ -126,7 +126,7 @@ bad:
 }
 
 static gboolean
-collect_targets (GApplicationCommandLine *cmd, GVariantDict *opts, YoinkRequest *req, GListStore *torrents)
+collect_targets (GApplicationCommandLine *cmd, GVariantDict *opts, YoinkRequest *req)
 {
   g_autofree const char **args = NULL;
   if (!g_variant_dict_lookup (opts, G_OPTION_REMAINING, "^a&ay", &args))
@@ -143,7 +143,7 @@ collect_targets (GApplicationCommandLine *cmd, GVariantDict *opts, YoinkRequest 
       }
     } else if (g_str_has_suffix (*a, ".torrent")) {
       g_autoptr (GFile) file = g_application_command_line_create_file_for_arg (cmd, *a);
-      g_list_store_append (torrents, file);
+      yoink_request_add_torrent (req, file);
     } else {
       g_application_command_line_printerr (cmd, "yoink: ignoring '%s' (not a link or .torrent file)\n", *a);
     }
@@ -161,16 +161,11 @@ yoink_cmdline_handle (GApplicationCommandLine *cmd, YoinkCmdlineSubmit submit, g
     return read_stdin_request (cmd, submit, user_data);
 
   g_autoptr (YoinkRequest) req = yoink_request_new ();
-  g_autoptr (GListStore) torrents = g_list_store_new (G_TYPE_FILE);
 
-  if (!apply_options (cmd, opts, req) || !collect_targets (cmd, opts, req, torrents))
+  if (!apply_options (cmd, opts, req) || !collect_targets (cmd, opts, req))
     return 1;
 
-  gboolean has_links = req->uris->len > 0;
-  gboolean has_torrents = g_list_model_get_n_items (G_LIST_MODEL (torrents)) > 0;
-  if (has_links || has_torrents)
-    submit (has_links ? g_steal_pointer (&req) : NULL,
-            has_torrents ? G_LIST_MODEL (g_steal_pointer (&torrents)) : NULL,
-            user_data);
+  if (yoink_request_count (req) > 0)
+    submit (g_steal_pointer (&req), user_data);
   return 0;
 }

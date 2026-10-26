@@ -4,9 +4,8 @@
 
 #include "downloads/request.h"
 
-/* Receives what the command line asked for. Takes ownership of both;
- * either may be NULL. */
-typedef void (*YoinkCmdlineSubmit) (YoinkRequest *request, GListModel *torrents, gpointer user_data);
+/* Receives what the command line asked for; takes ownership. */
+typedef void (*YoinkCmdlineSubmit) (YoinkRequest *request, gpointer user_data);
 
 /* Registers --header, --referer, --user-agent, --out and --request-stdin. */
 void yoink_cmdline_register (GApplication *app);

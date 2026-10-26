@@ -4,6 +4,8 @@
 #include "app/cmdline.h"
 #include "app/notifier.h"
 #include "app/paths.h"
+#include "app/save_prompt.h"
+#include "app/settings.h"
 #include "app/version.h"
 #include "aria2/daemon.h"
 #include "downloads/add.h"
@@ -16,15 +18,14 @@
 struct _YoinkApplication {
   AdwApplication parent_instance;
 
-  Aria2Daemon   *daemon;
-  YoinkPoller   *poller;
-  YoinkNotifier *notifier;
-  YoinkWindow   *window;  /* weak */
-  char          *download_dir;
+  Aria2Daemon     *daemon;
+  YoinkPoller     *poller;
+  YoinkNotifier   *notifier;
+  YoinkSavePrompt *save_prompt;
+  YoinkWindow     *window;  /* weak */
 
-  /* asked for before aria2 was ready */
+  /* accepted before aria2 was ready */
   GPtrArray   *pending_requests;
-  GListStore  *pending_torrents;
 
   gboolean     connected;
   gint64       started_at;
@@ -59,26 +60,22 @@ flush_pending (YoinkApplication *self)
   for (guint i = 0; i < self->pending_requests->len; i++)
     yoink_add_request (client, g_ptr_array_index (self->pending_requests, i), on_added, self);
   g_ptr_array_set_size (self->pending_requests, 0);
+}
 
-  yoink_add_torrents (client, G_LIST_MODEL (self->pending_torrents), on_added, self);
-  g_list_store_remove_all (self->pending_torrents);
+static void
+on_save_accepted (YoinkRequest *request, gpointer user_data)
+{
+  YoinkApplication *self = user_data;
+
+  g_ptr_array_add (self->pending_requests, request);
+  if (self->connected)
+    flush_pending (self);
 }
 
 void
-yoink_application_submit (YoinkApplication *self, YoinkRequest *request, GListModel *torrents)
+yoink_application_submit (YoinkApplication *self, YoinkRequest *request)
 {
-  if (request)
-    g_ptr_array_add (self->pending_requests, request);
-
-  guint n = torrents ? g_list_model_get_n_items (torrents) : 0;
-  for (guint i = 0; i < n; i++) {
-    g_autoptr (GObject) file = g_list_model_get_item (torrents, i);
-    g_list_store_append (self->pending_torrents, file);
-  }
-  g_clear_object (&torrents);
-
-  if (self->connected)
-    flush_pending (self);
+  yoink_save_prompt_push (self->save_prompt, request);
 }
 
 /* ---------- aria2 lifecycle ---------- */
@@ -128,6 +125,7 @@ yoink_application_restart_aria2 (YoinkApplication *self)
 {
   g_autoptr (GError) error = NULL;
   g_autofree char *session = yoink_paths_session_file ();
+  g_autofree char *dir = yoink_settings_get_save_dir ();
 
   stop_aria2 (self);
   if (self->window) {
@@ -135,7 +133,7 @@ yoink_application_restart_aria2 (YoinkApplication *self)
     yoink_window_show_starting (self->window);
   }
 
-  self->daemon = aria2_daemon_spawn (self->download_dir, session, &error);
+  self->daemon = aria2_daemon_spawn (dir, session, &error);
   if (!self->daemon) {
     fatal (self, "Couldn't Start aria2", error->message);
     return;
@@ -148,9 +146,9 @@ yoink_application_restart_aria2 (YoinkApplication *self)
 /* ---------- GApplication ---------- */
 
 static void
-on_cmdline_submit (YoinkRequest *request, GListModel *torrents, gpointer user_data)
+on_cmdline_submit (YoinkRequest *request, gpointer user_data)
 {
-  yoink_application_submit (user_data, request, torrents);
+  yoink_application_submit (user_data, request);
 }
 
 static void
@@ -162,7 +160,7 @@ yoink_application_startup (GApplication *app)
   yoink_style_load ();
   gtk_window_set_default_icon_name (YOINK_APP_ID);
   yoink_actions_install (self);
-  self->download_dir = yoink_paths_download_dir ();
+  self->save_prompt = yoink_save_prompt_new (GTK_APPLICATION (app), on_save_accepted, self);
   self->notifier = yoink_notifier_new (app);
 }
 
@@ -207,8 +205,7 @@ yoink_application_finalize (GObject *object)
   YoinkApplication *self = YOINK_APPLICATION (object);
 
   g_ptr_array_unref (self->pending_requests);
-  g_object_unref (self->pending_torrents);
-  g_free (self->download_dir);
+  g_clear_pointer (&self->save_prompt, yoink_save_prompt_free);
   G_OBJECT_CLASS (yoink_application_parent_class)->finalize (object);
 }
 
@@ -226,7 +223,6 @@ static void
 yoink_application_init (YoinkApplication *self)
 {
   self->pending_requests = g_ptr_array_new_with_free_func ((GDestroyNotify) yoink_request_free);
-  self->pending_torrents = g_list_store_new (G_TYPE_FILE);
   yoink_cmdline_register (G_APPLICATION (self));
 }
 
@@ -245,12 +241,6 @@ Aria2Client *
 yoink_application_get_client (YoinkApplication *self)
 {
   return self->daemon ? aria2_daemon_get_client (self->daemon) : NULL;
-}
-
-const char *
-yoink_application_get_download_dir (YoinkApplication *self)
-{
-  return self->download_dir;
 }
 
 GtkWidget *

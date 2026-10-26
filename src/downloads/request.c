@@ -10,6 +10,7 @@ yoink_request_new (void)
 {
   YoinkRequest *r = g_new0 (YoinkRequest, 1);
   r->uris = g_ptr_array_new_with_free_func (g_free);
+  r->torrents = g_ptr_array_new_with_free_func (g_object_unref);
   r->headers = g_ptr_array_new_with_free_func (g_free);
   return r;
 }
@@ -20,11 +21,19 @@ yoink_request_free (YoinkRequest *r)
   if (!r)
     return;
   g_ptr_array_unref (r->uris);
+  g_ptr_array_unref (r->torrents);
   g_ptr_array_unref (r->headers);
   g_free (r->referer);
   g_free (r->user_agent);
   g_free (r->out);
+  g_free (r->dir);
   g_free (r);
+}
+
+guint
+yoink_request_count (const YoinkRequest *r)
+{
+  return r->uris->len + r->torrents->len;
 }
 
 static gboolean
@@ -49,6 +58,12 @@ yoink_request_add_uri (YoinkRequest *r, const char *uri, GError **error)
   return TRUE;
 }
 
+void
+yoink_request_add_torrent (YoinkRequest *r, GFile *file)
+{
+  g_ptr_array_add (r->torrents, g_object_ref (file));
+}
+
 gboolean
 yoink_request_add_header (YoinkRequest *r, const char *header, GError **error)
 {
@@ -61,11 +76,17 @@ yoink_request_add_header (YoinkRequest *r, const char *header, GError **error)
 }
 
 gboolean
+yoink_request_out_is_valid (const char *name)
+{
+  /* never let a request write outside the download dir */
+  return *name && !strchr (name, '/') && !g_str_equal (name, ".") && !g_str_equal (name, "..") &&
+         !has_line_break (name);
+}
+
+gboolean
 yoink_request_set_out (YoinkRequest *r, const char *name, GError **error)
 {
-  /* a bare file name only: never let a request write outside the download dir */
-  if (!*name || strchr (name, '/') || g_str_equal (name, ".") || g_str_equal (name, "..") ||
-      has_line_break (name))
+  if (!yoink_request_out_is_valid (name))
     return invalid (error, "file name", name);
   g_set_str (&r->out, name);
   return TRUE;
@@ -140,6 +161,18 @@ yoink_request_to_options (const YoinkRequest *r)
   /* one output name can't apply to several links */
   if (r->out && r->uris->len == 1)
     json_object_set_string_member (opts, "out", r->out);
+  if (r->dir)
+    json_object_set_string_member (opts, "dir", r->dir);
 
+  return opts;
+}
+
+JsonObject *
+yoink_request_torrent_options (const YoinkRequest *r)
+{
+  /* headers and the file name are for links; a torrent names its own files */
+  JsonObject *opts = json_object_new ();
+  if (r->dir)
+    json_object_set_string_member (opts, "dir", r->dir);
   return opts;
 }
