@@ -83,3 +83,7 @@ make uninstall
 Then remove the extension from `chrome://extensions`. Your settings
 (`~/.config/yoink`) and download queue (`~/.local/state/yoink`) are left
 alone; delete them if you want a clean slate.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
