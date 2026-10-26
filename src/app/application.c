@@ -160,6 +160,7 @@ dy_application_startup (GApplication *app)
   G_APPLICATION_CLASS (dy_application_parent_class)->startup (app);
 
   dy_style_load ();
+  gtk_window_set_default_icon_name (DY_APP_ID);
   dy_actions_install (self);
   self->download_dir = dy_paths_download_dir ();
   self->notifier = dy_notifier_new (app);

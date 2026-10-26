@@ -43,6 +43,7 @@ compile_flags.txt: Makefile
 install: dy dy-host
 	install -Dm755 dy $(DESTDIR)$(PREFIX)/bin/dy
 	install -Dm755 dy-host $(DESTDIR)$(PREFIX)/bin/dy-host
+	install -Dm644 data/icons/dev.soka.dy.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/dev.soka.dy.svg
 	install -d $(DESTDIR)$(PREFIX)/share/applications
 	sed 's|@BINDIR@|$(PREFIX)/bin|' data/dev.soka.dy.desktop > $(DESTDIR)$(PREFIX)/share/applications/dev.soka.dy.desktop
 	rm -rf $(DESTDIR)$(PREFIX)/share/dy/extension
@@ -61,6 +62,7 @@ install: dy dy-host
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/dy $(DESTDIR)$(PREFIX)/bin/dy-host
 	rm -f $(DESTDIR)$(PREFIX)/share/applications/dev.soka.dy.desktop
+	rm -f $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/dev.soka.dy.svg
 	rm -rf $(DESTDIR)$(PREFIX)/share/dy
 	for b in $(BROWSER_DIRS); do rm -f "$(HOME)/.config/$$b/NativeMessagingHosts/$(NATIVE_HOST).json"; done
 
